@@ -1,0 +1,542 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Happy Birthday</title>
+  <style>
+    :root{
+      --bg:#0b0f17; --bg-alt:#07101a; --card:#0f1722; --accent:#ff6b81; --muted:#b6c0cc; --glass: rgba(255,255,255,0.03);
+      --transition: 300ms cubic-bezier(.2,.9,.3,1);
+    }
+    [data-theme="light"]{--bg:#f6f7fb; --bg-alt:#ffffff; --card:#ffffff; --accent:#ff6b81; --muted:#5b6470; color:#0b1220}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+  margin:0;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: radial-gradient(circle at 10% 10%, rgba(255,107,129,0.06), transparent 10%), var(--bg);
+  color: #e8eef8;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  /* removed flex centering */
+  padding:30px;
+  transition: background var(--transition), color var(--transition);
+
+      /* margin:0; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: radial-gradient(circle at 10% 10%, rgba(255,107,129,0.06), transparent 10%), var(--bg);
+      color: #e8eef8; min-height:100vh; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      display:flex; align-items:center; justify-content:center; padding:30px; transition: background var(--transition), color var(--transition); */
+    }
+
+    .site{width:100%; max-width:1100px; border-radius:18px; overflow:hidden; box-shadow:0 10px 40px rgba(0,0,0,0.45); background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); display:grid; grid-template-columns:1fr 420px; gap:24px; padding:28px; align-items:stretch;}
+    .hero{padding:28px; position:relative; min-height:520px; display:flex; flex-direction:column; justify-content:center; gap:12px; transition:opacity var(--transition), transform var(--transition)}
+    h1{font-size:48px; margin:0 0 8px; letter-spacing:-1px}
+    p.lead{color:var(--muted); margin:0 0 8px}
+
+    .controls{display:flex; gap:12px; align-items:center}
+    .buttons{display:flex; gap:12px}
+    .btn{background:var(--glass); border:1px solid rgba(255,255,255,0.04); padding:10px 14px; border-radius:10px; cursor:pointer; color:inherit; font-weight:600; transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition);}
+    .btn:hover{transform:translateY(-4px); box-shadow:0 14px 30px rgba(0,0,0,0.35)}
+    .btn.primary{background:linear-gradient(90deg,var(--accent),#ff9fb3); color:#08101a; box-shadow:0 10px 30px rgba(255,107,129,0.12)}
+
+    .theme-toggle{margin-left:auto; display:flex; gap:8px; align-items:center}
+    .icon-btn{background:transparent; border:0; color:inherit; cursor:pointer; padding:6px; border-radius:8px}
+
+    .panel{padding:18px; border-radius:12px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); display:flex; align-items:center; justify-content:center; position:relative}
+
+    .bear-wrap{position:relative; width:320px; height:420px; transition: transform var(--transition)}
+    .bear-wrap:hover{transform:translateY(-6px) scale(1.01)}
+    svg{display:block; width:100%; height:100%}
+
+    /* breathing animation */
+    @keyframes breathe{0%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.01)}100%{transform:translateY(0) scale(1)}}
+    .bear-breath{animation: breathe 3200ms ease-in-out infinite}
+
+    /* floating hearts with smooth stagger */
+    .floating-heart{position:absolute; left:50%; transform:translateX(-50%); bottom:6%; pointer-events:none}
+    .floating-heart i{position:absolute; width:18px; height:18px; transform-origin:center bottom; bottom:0; opacity:0; animation: floatUp 6s cubic-bezier(.2,.6,.15,1) infinite}
+    .floating-heart i:nth-child(1){left:10%; animation-delay:0s}
+    .floating-heart i:nth-child(2){left:30%; animation-delay:0.6s}
+    .floating-heart i:nth-child(3){left:50%; animation-delay:1.2s}
+    .floating-heart i:nth-child(4){left:70%; animation-delay:1.8s}
+    .floating-heart i:nth-child(5){left:90%; animation-delay:2.4s}
+
+/* float bottom -> top */
+    @keyframes floatUp{0%{transform:translateY(0) scale(0.75) rotate(-8deg); opacity:0}10%{opacity:1}60%{transform:translateY(-260px) scale(1.05) rotate(12deg)}100%{transform:translateY(-420px) scale(0.9) rotate(18deg); opacity:0}}
+
+    /* Robust heart shape (no clip-path) */
+    .heart-shape{
+      position: relative;
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      transform: rotate(-45deg) scale(0.9);
+      border-radius: 3px;
+      display: inline-block;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    }
+    .heart-shape::before,
+    .heart-shape::after{
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 50%;
+      top: -10px;
+      left: 0;
+    }
+    .heart-shape::after{
+      left: 10px;
+    }
+
+    /* Modal letter */
+    .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); transition:opacity var(--transition)}
+    .modal.open{display:flex}
+    .letter{width:90%; max-width:720px; background:linear-gradient(180deg,#fff,#fff); color:#111; padding:26px; border-radius:12px; transform:translateY(10px); transition: transform var(--transition), opacity var(--transition)}
+    .letter.open{transform:translateY(0)}
+    .letter h2{margin:0 0 10px}
+    .letter .content{background:#fff; padding:12px; border-radius:8px; height:220px; overflow:auto}
+    .letter .actions{display:flex; gap:10px; justify-content:flex-end; margin-top:12px}
+
+    /* Gallery */
+    .gallery{display:none; padding:28px; min-height:520px; opacity:0; transform:translateY(8px); transition: opacity var(--transition), transform var(--transition)}
+    .gallery.open{display:block; opacity:1; transform:translateY(0)}
+    .gallery-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px}
+    .photo{height:160px; border-radius:10px; overflow:hidden; display:flex; align-items:center; justify-content:center; background-size:cover; background-position:center; box-shadow:0 6px 18px rgba(0,0,0,0.45); transition: transform var(--transition), box-shadow var(--transition)}
+    .photo:hover{transform:translateY(-6px); box-shadow:0 18px 40px rgba(0,0,0,0.55)}
+
+    .bow-bg{background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><g fill="%23ffd6e0"><path d="M20 30c0 10 20 10 20 0s-20-20-20 0z"/><path d="M60 30c0 10-20 10-20 0s20-20 20 0z"/><circle cx="40" cy="40" r="6" fill="%23ff9fb3"/></g></svg>'); background-repeat:repeat; padding:18px; border-radius:12px; min-height:420px}
+
+    /* lightbox */
+    .lightbox{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.75); z-index:60}
+    .lightbox.open{display:flex}
+    .lightbox img{max-width:90%; max-height:80%; border-radius:10px; box-shadow:0 18px 50px rgba(0,0,0,0.7)}
+    .lightbox .caption{color:#fff; margin-top:8px; text-align:center}
+
+    /* tiny toast */
+    .toast{position:fixed; right:18px; bottom:18px; background:#111; color:#fff; padding:10px 14px; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,0.4); opacity:0; transform:translateY(10px); transition:opacity var(--transition), transform var(--transition); z-index:90}
+    .toast.show{opacity:1; transform:translateY(0)}
+
+    footer{grid-column:1/-1; text-align:center; color:var(--muted); margin-top:8px}
+
+    /* @media (max-width:980px){.site{grid-template-columns:1fr}.panel{order:-1}} */
+    @media (max-width:980px){
+  body{
+    padding: 16px;
+  }
+
+  .site{
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .panel{
+    order: 2;
+  }
+
+  .hero{
+    order: 1;
+    padding: 16px;
+  }
+
+  h1{
+    font-size: 34px;
+  }
+
+  .bear-wrap{
+    width: 220px;
+    height: 300px;
+    margin: 0 auto;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <div class="site" id="app" data-theme="dark">
+    <div class="hero" id="main-page">
+      <div>
+        <h1>Happy Birthday shiva!</h1>
+        <p class="lead">Wishing you a day filled with cake,chocolate and lot of love and hearts. ❤️</p>
+        <div class="controls">
+          <div class="buttons">
+            <button class="btn primary" id="open-letter">Open Letter</button>
+            <button class="btn" id="go-gallery">View Gallery</button>
+            <button class="btn" id="surprise">Surprise</button>
+          </div>
+          <div class="theme-toggle">
+            <button class="icon-btn" id="toggle-theme" title="Toggle theme">🌙</button>
+            <button class="icon-btn" id="share-btn" title="Share">🔗</button>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:6px; color:var(--muted)">Try the Surprise button ,Press <strong>Esc</strong> to close modals.</div>
+    </div>
+
+    <div class="panel">
+      <div class="bear-wrap">
+        <svg viewBox="0 0 320 420" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#ffd8e0"/><stop offset="1" stop-color="#ff9fb3"/></linearGradient></defs>
+          <rect width="100%" height="100%" rx="18" fill="transparent"/>
+          <g transform="translate(40,20)" class="bear-breath">
+            <ellipse cx="120" cy="260" rx="86" ry="90" fill="#7b5a48" opacity="0.95" />
+            <ellipse cx="120" cy="200" rx="72" ry="78" fill="#9a765e" />
+            <circle cx="120" cy="100" r="60" fill="#9a765e" />
+            <circle cx="95" cy="80" r="12" fill="#7b5a48" />
+            <circle cx="145" cy="80" r="12" fill="#7b5a48" />
+            <ellipse cx="120" cy="115" rx="26" ry="18" fill="#7b5a48" />
+            <circle cx="75" cy="48" r="22" fill="#9a765e" />
+            <circle cx="165" cy="48" r="22" fill="#9a765e" />
+            <circle cx="75" cy="48" r="10" fill="#7b5a48" />
+            <circle cx="165" cy="48" r="10" fill="#7b5a48" />
+            <g transform="translate(60,180)">
+              <path d="M60 16C60 7 53 0 44 0 36 0 30 5 28 10 26 5 20 0 12 0 3 0 -4 7 -4 16 -4 28 14 38 44 64 74 38 92 28 92 16 92 7 85 0 76 0 68 0 60 7 60 16z" fill="url(#g)" transform="translate(20,20) scale(0.9)"/>
+            </g>
+            <ellipse cx="80" cy="220" rx="18" ry="12" fill="#7b5a48" />
+            <ellipse cx="160" cy="220" rx="18" ry="12" fill="#7b5a48" />
+            <ellipse cx="95" cy="115" rx="10" ry="6" fill="#ffb6c5" opacity="0.9" />
+            <ellipse cx="145" cy="115" rx="10" ry="6" fill="#ffb6c5" opacity="0.9" />
+          </g>
+        </svg>
+
+        <div class="floating-heart" aria-hidden>
+          <i style="--rand:0.12"><span class="heart-shape"></span></i>
+          <i style="--rand:0.42"><span class="heart-shape"></span></i>
+          <i style="--rand:0.76"><span class="heart-shape"></span></i>
+          <i style="--rand:0.28"><span class="heart-shape"></span></i>
+          <i style="--rand:0.88"><span class="heart-shape"></span></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="gallery" id="gallery-page">
+      <h2 style="margin-top:50px">Photo Gallery</h2>
+      <div class="bow-bg">
+        <div style="display:flex; gap:12px; align-items:center; margin-top:23px">
+          <button class="btn" id="prev-slide">◀ Prev</button>
+          <button class="btn" id="next-slide">Next ▶</button>
+          <button class="btn" id="start-slideshow">Start slideshow</button>
+          <button class="btn" id="stop-slideshow">Stop</button>
+          <button class="btn" id="back-home">Back</button>
+        </div>
+        <div class="gallery-grid" id="gallery-grid"></div>
+      </div>
+    </div>
+
+    <footer>Made with ♥ love</footer>
+  </div>
+
+  <!-- modal letter -->
+  <div class="modal" id="modal" aria-hidden="true" inert>
+    <div class="letter" role="dialog" aria-modal="true" aria-labelledby="letter-title">
+      <h2 id="letter-title">Dear Friend,</h2>
+      <div class="content" id="letter-content" tabindex="0">
+        <p>Wishing you the happiest of birthday.i know i am not there right know but hope ham jaldi milenge miss you and i love you bohot sara .</p>
+        <p><strong>- Someone who adores you lots of LOVE</strong></p>
+      </div>
+      <div class="actions">
+        <button class="btn" id="print-letter">Print</button>
+        <button class="btn primary" id="close-letter">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- lightbox for images -->
+  <div class="lightbox" id="lightbox" aria-hidden="true" inert>
+    <div style="text-align:center" role="dialog" aria-modal="true" aria-labelledby="lightbox-caption">
+      <img id="lightbox-img" alt="Gallery photo" />
+      <div class="caption" id="lightbox-caption"></div>
+      <div style="margin-top:8px">
+        <button class="btn" id="fav-photo">❤ Favorite</button>
+        <!-- <button class="btn" id="download-photo">⬇ Download</button> -->
+        <button class="btn" id="close-lightbox">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Saved to favorites</div>
+
+  <div class="confetti" id="confetti" style="position:fixed; inset:0; pointer-events:none; display:none"></div>
+
+  <audio id="surprise-audio" preload="auto"></audio>
+
+  <script>
+    // Elements
+    const openLetter = document.getElementById('open-letter');
+    const modal = document.getElementById('modal');
+    const closeLetter = document.getElementById('close-letter');
+    const printLetter = document.getElementById('print-letter');
+    const goGallery = document.getElementById('go-gallery');
+    const mainPage = document.getElementById('main-page');
+    const galleryPage = document.getElementById('gallery-page');
+    const surpriseBtn = document.getElementById('surprise');
+    const confettiBox = document.getElementById('confetti');
+    const toast = document.getElementById('toast');
+    const toggleTheme = document.getElementById('toggle-theme');
+    const app = document.getElementById('app');
+    const shareBtn = document.getElementById('share-btn');
+
+    // Lightbox controls
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxCaption = document.getElementById('lightbox-caption');
+    const favBtn = document.getElementById('fav-photo');
+    let currentIdx = 0;
+    let lastFocusedElement = null;
+
+    // Save/restore theme
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    app.setAttribute('data-theme', savedTheme);
+    toggleTheme.textContent = savedTheme==='dark' ? '🌙' : '☀️';
+    toggleTheme.addEventListener('click', ()=>{
+      const cur = app.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      app.setAttribute('data-theme', cur); localStorage.setItem('theme', cur);
+      toggleTheme.textContent = cur==='dark' ? '🌙' : '☀️';
+    });
+
+    // Share
+    shareBtn.addEventListener('click', async ()=>{
+      const shareData = {title:document.title, text:'Happy Birthday — check this out!', url:location.href};
+      if(navigator.share){ try{ await navigator.share(shareData); showToast('Shared!'); }catch(e){ showToast('Share cancelled'); }} else { navigator.clipboard.writeText(location.href).then(()=> showToast('Link copied to clipboard')) }
+    });
+
+    // Modal (Letter) open/close with focus management
+    openLetter.addEventListener('click', ()=>{
+      lastFocusedElement = document.activeElement;
+      // mark background inert to prevent background focus
+      app.setAttribute('inert','');
+      modal.removeAttribute('inert');
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden','false');
+      // put focus inside modal content
+      setTimeout(()=> document.getElementById('letter-content').focus(), 120);
+    });
+    closeLetter.addEventListener('click', closeLetterHandler);
+    function closeLetterHandler(){
+      // blur focused element inside modal first
+      if(document.activeElement) document.activeElement.blur();
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden','true');
+      modal.setAttribute('inert','');
+      // remove inert from app (background)
+      app.removeAttribute('inert');
+      // restore focus if possible
+      if(lastFocusedElement && typeof lastFocusedElement.focus === 'function') lastFocusedElement.focus();
+    }
+    printLetter.addEventListener('click', ()=> window.print());
+
+    // Photos data
+    const photos = [
+      {src:'gallery/image1.jpg', caption:'Cake and candles'},
+      {src:'gallery/image2.jpg', caption:'Birthday balloons'},
+      {src:'gallery/image3.jpg', caption:'Friends celebrating'},
+      {src:'gallery/image4.jpg', caption:'Wrapped gifts'},
+      {src:'gallery/image5.jpg', caption:'Party lights'},
+      {src:'gallery/image6.jpg', caption:'Sweet moments'}
+    ];
+
+    const grid = document.getElementById('gallery-grid');
+    photos.forEach((p, idx)=>{
+      const div = document.createElement('div'); div.className='photo'; div.style.backgroundImage = `url('${p.src}')`; div.tabIndex=0; div.setAttribute('role','button'); div.setAttribute('aria-label', p.caption);
+      div.addEventListener('click', ()=> openLightbox(idx));
+      div.addEventListener('keypress', (e)=> { if(e.key==='Enter') openLightbox(idx); });
+      grid.appendChild(div);
+    });
+
+    // Page navigation
+    document.getElementById('back-home').addEventListener('click', ()=>{ galleryPage.classList.remove('open'); mainPage.style.display=''; app.removeAttribute('inert'); });
+    goGallery.addEventListener('click', ()=>{ lastFocusedElement = document.activeElement; mainPage.style.display='none'; galleryPage.classList.add('open'); });
+
+    // Lightbox behavior (accessible)
+    function openLightbox(i){
+      lastFocusedElement = document.activeElement;
+      currentIdx = i;
+      lightboxImg.src = photos[i].src;
+      lightboxCaption.textContent = photos[i].caption;
+      // make background inert to trap focus in lightbox
+      app.setAttribute('inert','');
+      lightbox.removeAttribute('inert');
+      lightbox.classList.add('open');
+      lightbox.setAttribute('aria-hidden','false');
+      // focus the close button inside
+      setTimeout(()=> document.getElementById('close-lightbox').focus(), 120);
+    }
+
+    document.getElementById('close-lightbox').addEventListener('click', closeLightboxHandler);
+    function closeLightboxHandler(){
+      // blur active before hide to avoid aria-hidden focused descendant
+      if(document.activeElement) document.activeElement.blur();
+      // close UI
+      lightbox.classList.remove('open');
+      // hide to screen readers
+      lightbox.setAttribute('aria-hidden','true');
+      // mark lightbox inert
+      lightbox.setAttribute('inert','');
+      // remove inert from background
+      app.removeAttribute('inert');
+      // restore focus
+      if(lastFocusedElement && typeof lastFocusedElement.focus === 'function') lastFocusedElement.focus();
+    }
+
+    // Favorite handling
+    favBtn.addEventListener('click', ()=>{
+      const favs = JSON.parse(localStorage.getItem('favs')||'[]');
+      if(!favs.includes(photos[currentIdx].src)){
+        favs.push(photos[currentIdx].src);
+        localStorage.setItem('favs', JSON.stringify(favs));
+        showToast('Saved to favorites');
+      } else {
+        showToast('Already in favorites');
+      }
+    });
+
+    // Download current photo
+    // document.getElementById('download-photo').addEventListener('click', ()=>{
+    //   const a = document.createElement('a'); a.href = photos[currentIdx].src; a.download = 'photo.jpg'; document.body.appendChild(a); a.click(); a.remove();
+    // });
+
+    // Slideshow
+    let slideInterval = null;
+    document.getElementById('start-slideshow').addEventListener('click', ()=>{ if(slideInterval) return; slideInterval = setInterval(()=> nextSlide(), 2500); showToast('Slideshow started'); });
+    document.getElementById('stop-slideshow').addEventListener('click', ()=>{ clearInterval(slideInterval); slideInterval=null; showToast('Slideshow stopped'); });
+    function nextSlide(){ currentIdx = (currentIdx+1) % photos.length; openLightbox(currentIdx); }
+    document.getElementById('next-slide').addEventListener('click', ()=> nextSlide());
+    document.getElementById('prev-slide').addEventListener('click', ()=>{ currentIdx = (currentIdx-1+photos.length)%photos.length; openLightbox(currentIdx); });
+
+    // Confetti burst + short tone
+    // Confetti burst + short tone (safer)
+function burstConfetti() {
+  if (!confettiBox) return;
+
+  confettiBox.innerHTML = '';
+  for (let i = 0; i < 80; i++) {
+    const p = document.createElement('div');
+    p.style.position = 'absolute';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.top = Math.random() * 20 + '%';
+    p.style.width = '10px';
+    p.style.height = '16px';
+    p.style.background = ['#ff6b81', '#ffd166', '#7fe3d0', '#9ab7ff', '#f4c2c2'][Math.floor(Math.random() * 5)];
+    p.style.transform = `translateY(-30vh) rotate(${Math.random() * 360}deg)`;
+    p.style.opacity = 1;
+    p.style.borderRadius = '2px';
+    p.style.animation = 'conf 1800ms linear forwards';
+    p.style.zIndex = 80;
+    confettiBox.appendChild(p);
+  }
+  confettiBox.style.display = 'block';
+  setTimeout(() => confettiBox.style.display = 'none', 1900);
+}
+
+if (surpriseBtn) {
+  surpriseBtn.addEventListener('click', () => {
+    // just to be 100% sure click is working
+    // (you can remove this alert later)
+    alert('Surprise! 🎉');
+
+    burstConfetti();
+
+    // tiny sound (in try/catch so it never breaks)
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.value = 880;
+      g.gain.value = 0.05;
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.start();
+      setTimeout(() => { o.frequency.value = 660; }, 150);
+      setTimeout(() => { o.stop(); ctx.close(); }, 650);
+    } catch (e) {}
+
+    // popup note
+    const note = document.createElement('div');
+    note.style.position = 'fixed';
+    note.style.left = '50%';
+    note.style.top = '15%';
+    note.style.transform = 'translateX(-50%)';
+    note.style.padding = '10px 16px';
+    note.style.borderRadius = '10px';
+    note.style.background = '#111';
+    note.style.border = '1px solid rgba(255,255,255,0.06)';
+    note.style.boxShadow = '0 8px 30px rgba(0,0,0,0.6)';
+    note.style.color = '#fff';
+    note.textContent = 'Surprise! 🎉';
+    note.style.opacity = '0';
+    note.style.transition = 'opacity 200ms';
+    note.style.zIndex = '200';
+    document.body.appendChild(note);
+    requestAnimationFrame(() => note.style.opacity = '1');
+    setTimeout(() => {
+      note.style.opacity = '0';
+      setTimeout(() => note.remove(), 300);
+    }, 1600);
+  });
+}
+
+    // function burstConfetti(){ confettiBox.innerHTML=''; for(let i=0;i<60;i++){ const p = document.createElement('div'); p.style.position='absolute'; p.style.left=Math.random()*100 + '%'; p.style.top = Math.random()*20 + '%'; p.style.width = '10px'; p.style.height = '16px'; p.style.background = ['#ff6b81','#ffd166','#7fe3d0','#9ab7ff','#f4c2c2'][Math.floor(Math.random()*5)]; p.style.transform = `translateY(-30vh) rotate(${Math.random()*360}deg)`; p.style.opacity=1; p.style.borderRadius='2px'; p.style.animation = 'conf 1800ms linear forwards'; p.style.zIndex=80; confettiBox.appendChild(p); } confettiBox.style.display='block'; setTimeout(()=> confettiBox.style.display='none', 1900); }
+    // surpriseBtn.addEventListener('click', ()=>{
+    //   burstConfetti();
+    //   try{ const ctx = new (window.AudioContext||window.webkitAudioContext)(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.type='sine'; o.frequency.value=880; g.gain.value=0.05; o.connect(g); g.connect(ctx.destination); o.start(); setTimeout(()=>{ o.frequency.value=660; },150); setTimeout(()=>{ o.stop(); ctx.close(); },650);}catch(e){}
+    //   const note=document.createElement('div'); note.style.position='fixed'; note.style.left='50%'; note.style.top='12%'; note.style.transform='translateX(-50%)'; note.style.padding='10px 16px'; note.style.borderRadius='10px'; note.style.background='#111'; note.style.border='1px solid rgba(255,255,255,0.06)'; note.style.boxShadow='0 8px 30px rgba(0,0,0,0.6)'; note.textContent='Surprise! 🎉'; note.style.opacity='0'; note.style.transition='opacity 200ms'; document.body.appendChild(note); requestAnimationFrame(()=> note.style.opacity='1'); setTimeout(()=>{ note.style.opacity='0'; setTimeout(()=> note.remove(),300) },1600);
+    // });
+
+    // tiny toast
+    function showToast(msg){ toast.textContent=msg; toast.classList.add('show'); setTimeout(()=> toast.classList.remove('show'),2000); }
+
+    // keyboard shortcuts & focus handling
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape'){
+        if(galleryPage.classList.contains('open')){ galleryPage.classList.remove('open'); mainPage.style.display=''; app.removeAttribute('inert'); }
+        if(modal.classList.contains('open')) closeLetterHandler();
+        if(lightbox.classList.contains('open')) closeLightboxHandler();
+      }
+      if(e.key === 'f' && lightbox.classList.contains('open')) favBtn.click();
+      if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='d'){ e.preventDefault(); downloadPage(); }
+    });
+
+    // download page helper
+    function downloadPage(){ const a = document.createElement('a'); const blob = new Blob([document.documentElement.outerHTML], {type:'text/html'}); a.href=URL.createObjectURL(blob); a.download='birthday_wish_site.html'; document.body.appendChild(a); a.click(); a.remove(); showToast('Downloaded page'); }
+
+    // focus-trap minimal for modal
+    // focus-trap minimal for modal (safe)
+if (modal) {
+  modal.addEventListener('keydown', (e)=>{ 
+    if(e.key==='Tab'){
+      const focusable = modal.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if(focusable.length===0) return;
+      const first = focusable[0];
+      const last  = focusable[focusable.length-1];
+
+      if(e.shiftKey && document.activeElement === first){
+        e.preventDefault();
+        last.focus();
+      } else if(!e.shiftKey && document.activeElement === last){
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  });
+}
+
+    // modal.addEventListener('keydown', (e)=>{ if(e.key==='Tab'){ const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'); if(focusable.length===0) return; const first=focusable[0], last=focusable[focusable.length-1]; if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); } else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); } } });
+
+    // provide console helpers
+    window._birthday = { downloadPage, openLightbox, photos };
+  </script>
+
+  <!-- confetti keyframes (declared at end so CSS keyframe is defined) -->
+  <style>
+    @keyframes conf{0%{transform:translateY(-20vh) rotate(0) scale(0.6); opacity:1} 100%{transform:translateY(110vh) rotate(720deg) scale(1); opacity:1}}
+  </style>
+</body>
+</html>
+
